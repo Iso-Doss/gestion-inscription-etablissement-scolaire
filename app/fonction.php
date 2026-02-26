@@ -1,6 +1,21 @@
 <?php
 
 /**
+ * Cette fonction permet de se connecter a une base de donnée.
+ * 
+ * @return PDO|bool Instance de la base de donnée.
+ */
+function connexion_base_de_donnees(): PDO|bool
+{
+    try {
+        return new PDO('mysql:host=localhost:8889;dbname=gestion_inscription_etablissement_scolaire;charset=utf8', 'root', 'root');
+    } catch (Exception $e) {
+        die('Erreur : ' . $e->getMessage());
+        return false;
+    }
+}
+
+/**
  * Cette fonction permet de recuperer le nom de la page.
  * 
  * @return string $nom_de_la_page Le nom de la page.
@@ -35,6 +50,28 @@ function routage(): string
             $ficher_de_la_page = './app/pages/tableau-de-board.php';
             break;
 
+        // Formation
+
+        case 'liste-formation':
+            $ficher_de_la_page = './app/pages/formation/liste.php';
+            break;
+
+        case 'ajouter-formation':
+            $ficher_de_la_page = './app/pages/formation/ajouter.php';
+            break;
+
+        case 'ajouter-formation-traitement':
+            $ficher_de_la_page = './app/pages/formation/ajouter-traitement.php';
+            break;
+
+        case 'modifier-formation':
+            $ficher_de_la_page = './app/pages/formation/modifier.php';
+            break;
+
+        case 'supprimer-formation':
+            $ficher_de_la_page = './app/pages/formation/supprimer.php';
+            break;
+
         // Apprenant
 
         case 'liste-apprenant':
@@ -51,24 +88,6 @@ function routage(): string
 
         case 'supprimer-apprenant':
             $ficher_de_la_page = './app/pages/apprenant/supprimer.php';
-            break;
-
-        // Formation
-
-        case 'liste-formation':
-            $ficher_de_la_page = './app/pages/formation/liste.php';
-            break;
-
-        case 'ajouter-formation':
-            $ficher_de_la_page = './app/pages/formation/ajouter.php';
-            break;
-
-        case 'modifier-formation':
-            $ficher_de_la_page = './app/pages/formation/modifier.php';
-            break;
-
-        case 'supprimer-formation':
-            $ficher_de_la_page = './app/pages/formation/supprimer.php';
             break;
 
         // Inscription
@@ -134,5 +153,102 @@ function entete_de_ma_page(string $nom_de_la_page, array $action = [])
             <!--end::App Content Header-->';
 }
 
+/**
+ * Cette fonction permet d'ajouter une filière ou formation dans la table filières de notre base de donnée.
+ * 
+ * @param string $nom Le nom de la filière.
+ * @param string $montant Le montant de la filière.
+ * @param string|null $description  La description  de la filière.
+ * @return bool La filière a été créer ou non.
+ */
+function ajouter_formation(string $nom, int $montant, string|null $description = null): bool
+{
+    $ajouter_formation = false;
 
-?>
+    $requette = "INSERT INTO `filieres` (`nom`, `montant_scolarite`, `description`, `creer_le`, `modifier_le`, `supprimer_le`) VALUES (:nom, :montant, :description_filiere, NOW(), NOW(), NOW());";
+
+    $instance_base_de_donnees =  connexion_base_de_donnees();
+    $preparation_de_la_requette = $instance_base_de_donnees->prepare($requette);
+    $formation = $preparation_de_la_requette->execute([
+        'nom' => $nom,
+        'montant' => $montant,
+        'description_filiere' => $description,
+    ]);
+
+    $ajouter_formation = $formation ? true : false;
+
+    return $ajouter_formation;
+}
+
+/**
+ * Cette fonction permet de récupéré la liste des filières ou formations dans la table filières de notre base de donnée.
+ * 
+ * @return array La liste des filières.
+ */
+function list_formation(): array
+{
+    $list_formation = [];
+
+    $requette = "SELECT * FROM `filieres`;";
+
+    $instance_base_de_donnees =  connexion_base_de_donnees();
+    $preparation_de_la_requette = $instance_base_de_donnees->prepare($requette);
+    $preparation_de_la_requette->execute();
+
+    $list_formation = $preparation_de_la_requette->fetchAll(PDO::FETCH_ASSOC);
+
+    return $list_formation;
+}
+
+/**
+ * Cette fonction permet de récupéré une filières ou une formation dans la table filières de notre base de donnée.
+ * 
+ * @param int $id L'identifiant de la filière.
+ * @return array La filière.
+ */
+function recuperer_formation(int $id): array
+{
+    $recuperer_formation = [];
+
+    $requette = "SELECT * FROM `filieres` WHERE id=:id ;";
+
+    $instance_base_de_donnees =  connexion_base_de_donnees();
+    $preparation_de_la_requette = $instance_base_de_donnees->prepare($requette);
+    $preparation_de_la_requette->execute([
+        'id' => $id
+    ]);
+
+    $formation = $preparation_de_la_requette->fetch(PDO::FETCH_ASSOC);
+    $recuperer_formation =  $formation ? $formation : [];
+
+    return $recuperer_formation;
+}
+
+/**
+ * Cette fonction permet de modifier une filière ou formation grace a son identifiamt dans la table filières de notre base de donnée.
+ * 
+ * @param string $id L'identifiant de la filière.
+ * @param string $nom Le nom de la filière.
+ * @param string $montant Le montant de la filière.
+ * @param string|null $description  La description  de la filière.
+ * @return bool La filière a été créer ou non.
+ */
+function modifier_formation(int $id, string $nom, int $montant, string|null $description = null): bool
+{
+    $modifier_formation = false;
+
+    $requette = "UPDATE `filieres` SET `nom` = :nom, `montant_scolarite` = :montant_scolarite, `description` = :description_formation WHERE `filieres`.`id` = :id;";
+
+    $instance_base_de_donnees =  connexion_base_de_donnees();
+    $preparation_de_la_requette = $instance_base_de_donnees->prepare($requette);
+    $formation = $preparation_de_la_requette->execute([
+        'id' => $id,
+        'nom' => $nom,
+        'montant_scolarite' => $montant,
+        'description_formation' => $description,
+    ]);
+
+    $modifier_formation = $formation ? true : false;
+
+    return $modifier_formation;
+}

@@ -1,6 +1,8 @@
 <?php
 $nom_de_la_page = 'Liste des formations';
 echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Ajouter une formation', 'href' => 'index.php?page=ajouter-formation']);
+
+$formations = list_formation();
 ?>
 
 <!--begin::Container-->
@@ -16,71 +18,63 @@ echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Ajouter une formation', 'href
                 </div>
                 <!-- /.card-header -->
                 <div class="card-body">
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th style="width: 10px">#</th>
-                                <th>Task</th>
-                                <th>Progress</th>
-                                <th style="width: 40px">Label</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="align-middle">
-                                <td>1.</td>
-                                <td>Update software</td>
-                                <td>
-                                    <div class="progress progress-xs">
-                                        <div
-                                            class="progress-bar progress-bar-danger"
-                                            style="width: 55%"></div>
-                                    </div>
-                                </td>
-                                <td><span class="badge text-bg-danger">55%</span></td>
-                            </tr>
-                            <tr class="align-middle">
-                                <td>2.</td>
-                                <td>Clean database</td>
-                                <td>
-                                    <div class="progress progress-xs">
-                                        <div class="progress-bar text-bg-warning" style="width: 70%"></div>
-                                    </div>
-                                </td>
-                                <td><span class="badge text-bg-warning">70%</span></td>
-                            </tr>
-                            <tr class="align-middle">
-                                <td>3.</td>
-                                <td>Cron job running</td>
-                                <td>
-                                    <div class="progress progress-xs progress-striped active">
-                                        <div class="progress-bar text-bg-primary" style="width: 30%"></div>
-                                    </div>
-                                </td>
-                                <td><span class="badge text-bg-primary">30%</span></td>
-                            </tr>
-                            <tr class="align-middle">
-                                <td>4.</td>
-                                <td>Fix and squish bugs</td>
-                                <td>
-                                    <div class="progress progress-xs progress-striped active">
-                                        <div class="progress-bar text-bg-success" style="width: 90%"></div>
-                                    </div>
-                                </td>
-                                <td><span class="badge text-bg-success">90%</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <?php if (!empty($formations)) { ?>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th style="width: 10px">#</th>
+                                    <th>Nom</th>
+                                    <th>Montant de la scolarité</th>
+                                    <th>Descrption</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($formations as $formation) { ?>
+                                    <tr class="align-middle">
+                                        <td>
+                                            <?= $formation['id'] ?? '-'; ?>
+                                        </td>
+                                        <td>
+                                            <?= $formation['nom'] ?? '-'; ?>
+                                        </td>
+                                        <td>
+                                            <?= $formation['montant_scolarite'] ?? '-'; ?>
+                                        </td>
+                                        <td>
+                                            <?= $formation['description'] ?? '-'; ?>
+                                        </td>
+                                        <td>
+                                            <a href="index.php?page=modifier-formation&id=<?= $formation['id'] ?? '-'; ?>" class="btn btn-warning">
+                                                Modifier
+                                            </a>
+
+                                            <a href="index.php?page=supprimer-formation&id=<?= $formation['id'] ?? '-'; ?>" class="btn btn-danger">
+                                                Supprimer
+                                            </a>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            </tbody>
+                        </table>
+                    <?php } else { ?>
+                        <p>
+                            Aucune formation n'est disponible pour le moment.
+                        </p>
+                    <?php } ?>
                 </div>
-                <!-- /.card-body -->
-                <div class="card-footer clearfix">
-                    <ul class="pagination pagination-sm m-0 float-end">
-                        <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
-                    </ul>
-                </div>
+                <?php if (!empty($formations)) { ?>
+                    <!-- /.card-body -->
+                    <div class="card-footer clearfix">
+                        <ul class="pagination pagination-sm m-0 float-end">
+                            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+                            <li class="page-item"><a class="page-link" href="#">1</a></li>
+                            <li class="page-item"><a class="page-link" href="#">2</a></li>
+                            <li class="page-item"><a class="page-link" href="#">3</a></li>
+                            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+                        </ul>
+                    </div>
+                <?php } ?>
             </div>
         </div>
     </div>
