@@ -165,7 +165,7 @@ function ajouter_formation(string $nom, int $montant, string|null $description =
 {
     $ajouter_formation = false;
 
-    $requette = "INSERT INTO `filieres` (`nom`, `montant_scolarite`, `description`, `creer_le`, `modifier_le`, `supprimer_le`) VALUES (:nom, :montant, :description_filiere, NOW(), NOW(), NOW());";
+    $requette = "INSERT INTO `filieres` (`nom`, `montant_scolarite`, `description`, `creer_le`, `modifier_le`) VALUES (:nom, :montant, :description_filiere, NOW(), NOW());";
 
     $instance_base_de_donnees =  connexion_base_de_donnees();
     $preparation_de_la_requette = $instance_base_de_donnees->prepare($requette);
@@ -185,14 +185,20 @@ function ajouter_formation(string $nom, int $montant, string|null $description =
  * 
  * @return array La liste des filières.
  */
-function list_formation(): array
+function list_formation(int $numero_page = 1, int $limite = 10): array
 {
     $list_formation = [];
 
-    $requette = "SELECT * FROM `filieres`;";
+    $requette = "SELECT * FROM `filieres` WHERE supprimer_le is null LIMIT :limit OFFSET :offset;";
 
     $instance_base_de_donnees =  connexion_base_de_donnees();
     $preparation_de_la_requette = $instance_base_de_donnees->prepare($requette);
+
+    $offset = ($numero_page - 1) * $limite;
+    // Explicitly bind as integers
+    $preparation_de_la_requette->bindParam(':limit', $limite, PDO::PARAM_INT);
+    $preparation_de_la_requette->bindParam(':offset', $offset, PDO::PARAM_INT);
+
     $preparation_de_la_requette->execute();
 
     $list_formation = $preparation_de_la_requette->fetchAll(PDO::FETCH_ASSOC);
@@ -210,7 +216,7 @@ function recuperer_formation(int $id): array
 {
     $recuperer_formation = [];
 
-    $requette = "SELECT * FROM `filieres` WHERE id=:id ;";
+    $requette = "SELECT * FROM `filieres` WHERE id=:id and supprimer_le is null ;";
 
     $instance_base_de_donnees =  connexion_base_de_donnees();
     $preparation_de_la_requette = $instance_base_de_donnees->prepare($requette);
@@ -251,4 +257,27 @@ function modifier_formation(int $id, string $nom, int $montant, string|null $des
     $modifier_formation = $formation ? true : false;
 
     return $modifier_formation;
+}
+
+/**
+ * Cette fonction permet de supprimer une filière ou formation grace a son identifiamt dans la table filières de notre base de donnée.
+ * 
+ * @param string $id L'identifiant de la filière.
+ * @return bool La filière a été créer ou non.
+ */
+function supprimer_de_maniere_logique_formation(int $id): bool
+{
+    $supprimer_de_maniere_logique_formation = false;
+
+    $requette = "UPDATE `filieres` SET `supprimer_le` = now() WHERE `filieres`.`id` = :id;";
+
+    $instance_base_de_donnees =  connexion_base_de_donnees();
+    $preparation_de_la_requette = $instance_base_de_donnees->prepare($requette);
+    $formation = $preparation_de_la_requette->execute([
+        'id' => $id,
+    ]);
+
+    $supprimer_de_maniere_logique_formation = $formation ? true : false;
+
+    return $supprimer_de_maniere_logique_formation;
 }
