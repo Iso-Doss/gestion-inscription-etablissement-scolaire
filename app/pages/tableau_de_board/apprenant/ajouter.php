@@ -1,6 +1,8 @@
 <?php
-$nom_de_la_page = 'Modifier un apprenant';
-echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Litste des apprenants', 'href' => 'index.php?page=liste-apprenant']);
+$nom_de_la_page = 'Ajouter un apprenant';
+echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Liste des apprenants', 'href' => 'index.php?page=liste-apprenant']);
+
+require_once './app/pages/tableau_de_board/template_debut.php';
 ?>
 
 

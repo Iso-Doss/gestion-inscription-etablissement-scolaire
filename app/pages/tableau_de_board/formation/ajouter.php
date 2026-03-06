@@ -3,7 +3,6 @@ $donnees = $_POST;
 $erreurs = [];
 $message = '';
 $nom_de_la_page = 'Ajouter une formation';
-echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Liste des formations', 'href' => 'index.php?page=liste-formation']);
 
 
 if (!empty($_POST)) {
@@ -32,7 +31,8 @@ if (!empty($_POST)) {
     }
 }
 
-
+require_once './app/pages/tableau_de_board/template_debut.php';
+echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Liste des formations', 'href' => 'index.php?page=liste-formation']);
 ?>
 
 
@@ -133,3 +133,5 @@ if (!empty($_POST)) {
     <!--end::Row-->
 </div>
 <!--end::Container-->
+
+<? require_once './app/pages/tableau_de_board/template_fin.php'; ?>

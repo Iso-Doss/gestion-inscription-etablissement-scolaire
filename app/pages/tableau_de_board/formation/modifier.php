@@ -13,10 +13,6 @@ if (empty($formation)) {
     $nom_de_la_page = 'Modifier la formation "' . ($formation['nom'] ?? '') . '"';
 }
 
-
-echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Liste des formations', 'href' => 'index.php?page=liste-formation']);
-
-
 if (!empty($_POST)) {
     $donnees = $_POST;
     if (!isset($_POST['nom']) || empty($_POST['nom'])) {
@@ -42,6 +38,9 @@ if (!empty($_POST)) {
         $message = "Oups !!! Un ou plusieur(s) champ(s) sont incorrect(s).";
     }
 }
+
+require_once './app/pages/tableau_de_board/template_debut.php';
+echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Liste des formations', 'href' => 'index.php?page=liste-formation']);
 
 ?>
 
@@ -143,3 +142,5 @@ if (!empty($_POST)) {
     <!--end::Row-->
 </div>
 <!--end::Container-->
+
+<? require_once './app/pages/tableau_de_board/template_fin.php'; ?>

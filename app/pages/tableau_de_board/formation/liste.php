@@ -1,6 +1,5 @@
 <?php
 $nom_de_la_page = 'Liste des formations';
-echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Ajouter une formation', 'href' => 'index.php?page=ajouter-formation']);
 
 if (!empty($_GET['id']) && !empty($_GET['action']) && $_GET['action'] === 'supprimer') {
     $formation = recuperer_formation($_GET['id'] ?? 0);
@@ -29,7 +28,12 @@ if (!empty($_GET['limite']) && $_GET['limite'] > 0) {
     $limite = $_GET['limite'];
 }
 
-$formations = list_formation($numero_page, $limite);
+$montant_scolarite = intval($_GET['montant_scolarite'] ?? null) == 0 ? null : intval($_GET['montant_scolarite'] ?? null);
+
+$formations = list_formation($numero_page, $limite, $_GET['nom'] ?? null,  );
+
+require_once './app/pages/tableau_de_board/template_debut.php';
+echo entete_de_ma_page($nom_de_la_page, ['nom' => 'Ajouter une formation', 'href' => 'index.php?page=ajouter-formation']);
 
 ?>
 
@@ -47,6 +51,71 @@ $formations = list_formation($numero_page, $limite);
                     <?= $message; ?>
                 </div>
             <?php } ?>
+
+
+            <div class="accordion mb-4" id="liste-formation-filtres">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button
+                            class="accordion-button"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#collapseOne"
+                            aria-expanded="true"
+                            aria-controls="collapseOne">
+                            Cliquez ici pour appliquez un filtre
+                        </button>
+                    </h2>
+                    <div
+                        id="collapseOne"
+                        class="accordion-collapse collapse"
+                        data-bs-parent="#liste-formation-filtres">
+                        <div class="accordion-body">
+                            <form action="index.php" method="get">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ajouter-formation-nom" class="form-label">
+                                            Nom de la formation
+                                        </label>
+
+                                        <input type="hidden" name="page" value="liste-formation">
+
+                                        <input
+                                            type="text"
+                                            class="form-control"
+                                            id="liste-formation-nom"
+                                            name="nom"
+                                            value="<?= (!empty($donnees['nom'])) ? $donnees['nom'] : ''; ?>"
+                                            aria-describedby="liste-formation-nom-aide" />
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="ajouter-formation-montant-scolarite" class="form-label">
+                                            Montant de la scolariter de la formation
+                                        </label>
+
+                                        <input
+                                            type="number"
+                                            class="form-control"
+                                            id="ajouter-formation-montant-scolarite"
+                                            name="montant_scolarite"
+                                            value="<?= (!empty($donnees['montant_scolarite'])) ? $donnees['montant_scolarite'] : ''; ?>"
+                                            aria-describedby="ajouter-formation-montant-scolarite-aide" />
+
+                                        <div id="ajouter-formation-montant-scolarite-aide" class="form-text text-danger">
+                                            <?= (!empty($erreurs['montant_scolarite'])) ? $erreurs['montant_scolarite'] : '' ?>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3 mb-3">
+                                        <button type="submit" class="btn btn-primary">Rechercher</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="card mb-4">
                 <div class="card-header">
@@ -77,7 +146,7 @@ $formations = list_formation($numero_page, $limite);
                                             <?= $formation['nom'] ?? '-'; ?>
                                         </td>
                                         <td>
-                                            <?= $formation['montant_scolarite'] ?? '-'; ?>
+                                            <?= number_format($formation['montant_scolarite'], 0, ',', '.') . ' FCFA'  ?? '-'; ?>
                                         </td>
                                         <td>
                                             <?= $formation['description'] ?? '-'; ?>
@@ -145,3 +214,5 @@ $formations = list_formation($numero_page, $limite);
     <!--end::Row-->
 </div>
 <!--end::Container-->
+
+<? require_once './app/pages/tableau_de_board/template_fin.php'; ?>

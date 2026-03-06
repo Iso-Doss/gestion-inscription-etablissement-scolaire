@@ -18,11 +18,11 @@ function connexion_base_de_donnees(): PDO|bool
 /**
  * Cette fonction permet de recuperer le nom de la page.
  * 
- * @return string $nom_de_la_page Le nom de la page.
+ * @return null|string $nom_de_la_page Le nom de la page.
  */
-function obtenir_le_nom_de_la_page(): string
+function obtenir_le_nom_de_la_page(): ?string
 {
-    return $_GET['page'] ?? '';
+    return $_GET['page'] ?? null;
 }
 
 
@@ -185,19 +185,44 @@ function ajouter_formation(string $nom, int $montant, string|null $description =
  * 
  * @return array La liste des filières.
  */
-function list_formation(int $numero_page = 1, int $limite = 10): array
+function list_formation(int $numero_page = 1, int $limite = 10, ?string $nom = null, ?int $montant_scolarite = null): array
 {
+    //
     $list_formation = [];
+    $data = [];
 
-    $requette = "SELECT * FROM `filieres` WHERE supprimer_le is null LIMIT :limit OFFSET :offset;";
+    $requette_debut = "SELECT * FROM `filieres` WHERE supprimer_le is null ";
+
+    // if ($nom) {
+    //     $requette_debut = $requette_debut . " AND nom like ':nom'";
+    // }
+
+    // if ($montant_scolarite) {
+    //     $requette_debut = $requette_debut . " AND montant_scolarite like '%:montant_scolarite%'";
+    // }
+
+    $requette_fin = " LIMIT :limit OFFSET :offset;";
+
+
+    $requette = $requette_debut . $requette_fin;
 
     $instance_base_de_donnees =  connexion_base_de_donnees();
     $preparation_de_la_requette = $instance_base_de_donnees->prepare($requette);
 
     $offset = ($numero_page - 1) * $limite;
+
+    // if ($nom) {
+    //     $preparation_de_la_requette->bindParam(':nom', $nom, PDO::PARAM_STR);
+    // }
+
     // Explicitly bind as integers
     $preparation_de_la_requette->bindParam(':limit', $limite, PDO::PARAM_INT);
     $preparation_de_la_requette->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+    // if ($montant_scolarite) {
+    //     die('montant_scolarite');
+    //     $preparation_de_la_requette->bindParam(':montant_scolarite', $montant_scolarite, PDO::PARAM_INT);
+    // }
 
     $preparation_de_la_requette->execute();
 
@@ -280,4 +305,93 @@ function supprimer_de_maniere_logique_formation(int $id): bool
     $supprimer_de_maniere_logique_formation = $formation ? true : false;
 
     return $supprimer_de_maniere_logique_formation;
+}
+
+function estconnecter(): bool
+{
+    return isset($_SESSION['utilisateur']) && !empty($_SESSION['utilisateur']);
+}
+
+/**
+ * Cette fonction peremt de verrifier si une adresse email existe dans la table utilisateur de la base de données.
+ * 
+ * @param string $email L'adresse email.
+ * @return bool Es ce que l'adresse email existe ou pas.
+ */
+function adresse_email_exist(string $email): bool
+{
+    $adresse_email_exist = false;
+
+    $instance_base_de_donnee = connexion_base_de_donnees();
+
+    $requette = "SELECT * FROM utilisateur WHERE email=:email";
+
+    $resultat = $instance_base_de_donnee->prepare($requette);
+
+    $resultat->execute(['email' => $email]);
+
+    $utilisateur = $resultat->fetch();
+
+    $adresse_email_exist = (is_array($utilisateur)) ? true : $adresse_email_exist;
+
+    return $adresse_email_exist;
+}
+
+/**
+ * cette fonction permet d'inscrire un utilisateur dans la table utilisateur de la base de données.
+ * 
+ * @param string $nom Le nom de l'utilisateur.
+ * @param string $prenoms Le ou les prénom(s) de l'utilisateur.
+ * @param string $email L'adresse email de l'utilisateur.
+ * @param string $mot_de_passe Le mot de passe de l'utilisateur.
+ */
+function inscrire_utilisateur(string $nom, string $prenoms, string $email, string $mot_de_passe): bool
+{
+    $inscrire_utilisateur = false;
+
+    $instance_base_de_donnee = connexion_base_de_donnees();
+
+    $requette = "INSERT INTO utilisateur(nom, prenoms, email, mot_de_passe, creer_le, mise_a_jour_le, supprimer_le) VALUES(:nom, :prenoms, :email, :mot_de_passe, NOW(), NOW(), NOW())";
+
+    $resultat = $instance_base_de_donnee->prepare($requette);
+
+    $inscrire_utilisateur = $resultat->execute([
+        'nom' => $nom,
+        'prenoms' => $prenoms,
+        'email' => $email,
+        'mot_de_passe' => sha1($mot_de_passe),
+    ]);
+
+    return $inscrire_utilisateur;
+}
+
+
+
+/**
+ * Cette fonction peremt de connecter un utilisateur grace a son email et son mot de passe.
+ * 
+ * @param string $email L'adresse email.
+ * @param string $mot_de_passe Le mot de passe.
+ * @return bool|array $utilisateur L'utilisateur connecté.
+ */
+function connecter_utilisateur(string $email, string $mot_de_passe): bool|array
+{
+    $utilisateur = false;
+
+    $instance_base_de_donnee = connexion_base_de_donnees();
+
+    $requette = "SELECT * FROM utilisateur WHERE email=:email and mot_de_passe=:mot_de_passe";
+
+    $resultat = $instance_base_de_donnee->prepare($requette);
+
+    $resultat->execute([
+        'email' => $email,
+        'mot_de_passe' => sha1($mot_de_passe),
+    ]);
+
+    $utilisateur = $resultat->fetch();
+
+    $utilisateur = (is_array($utilisateur)) ? $utilisateur : false;
+
+    return $utilisateur;
 }

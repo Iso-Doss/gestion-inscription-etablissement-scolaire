@@ -1,8 +1,4 @@
-<?php
-$nom_de_la_page = 'Tableau de board';
-echo entete_de_ma_page($nom_de_la_page);
-?>
-
+<?php require_once './app/pages/tableau_de_board/template_debut.php'; ?>
 
 <!--begin::App Content-->
 <div class="app-content">
@@ -94,3 +90,6 @@ echo entete_de_ma_page($nom_de_la_page);
     <!--end::Container-->
 </div>
 <!--end::App Content-->
+
+
+<?php require_once './app/pages/tableau_de_board/template_fin.php'; ?>
